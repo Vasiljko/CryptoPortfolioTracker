@@ -1,0 +1,23 @@
+add transaction
+delete transaction
+edit transaction
+get transaction
+-- for these :
+    * buy/sell
+    * price
+    * amount
+    * date
+
+filter transactions only for specific crypto (maybe multi choice?)
+
+get total amount of specific crypto
+get total amount of specific crypto in $
+
+all of that for different users
+
+add user
+delete user and all of its transactions
+edit user
+get user
+
+authentication of users with OAuth2
