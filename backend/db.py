@@ -32,11 +32,15 @@ async def insert_transaction(username: str, transaction: Transaction):
     document = await collection.find_one({'username':username})
     if document is not None:
         await collection.update_one({'username':username}, {'$push' : {'transactions':transaction.dict()}})
-        return True
+
+        document = await collection.find_one({'username':username})
+        return document['transactions']
     else:
         userObj = User(username=username, transactions=[transaction])
         await collection.insert_one(userObj.dict())
-        return True
+        
+        document = await collection.find_one({'username':username})
+        return document['transactions']
 
         
 async def update_transaction(username: str, position: int, transaction: Transaction):
@@ -52,7 +56,6 @@ async def update_transaction(username: str, position: int, transaction: Transact
         return False
         
 async def remove_transaction(username: str, position: int):
-    print("?")
     document = await collection.find_one({'username':username})
     print(document)
     if document is not None:
@@ -67,4 +70,4 @@ async def remove_transaction(username: str, position: int):
         return True
     else:
         return False
-        
+
