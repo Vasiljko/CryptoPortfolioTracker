@@ -57,7 +57,7 @@ async def update_transaction(username: str, position: int, transaction: Transact
         
 async def remove_transaction(username: str, position: int):
     document = await collection.find_one({'username':username})
-    print(document)
+
     if document is not None:
         transactions_list = document['transactions']
         
@@ -65,9 +65,8 @@ async def remove_transaction(username: str, position: int):
             return False
 
         del transactions_list[position:position+1]
-        print(transactions_list)
         await collection.update_one({'username':username}, {'$set' : {'transactions':transactions_list}})
-        return True
+        return transactions_list
     else:
         return False
 

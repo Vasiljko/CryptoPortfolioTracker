@@ -4,6 +4,7 @@ import { Button } from '@material-ui/core';
 import TransactionView from '../components/TransactionView';
 import SendIcon from '@material-ui/icons/Send';
 import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
 import TextField from '@material-ui/core/TextField';
 import { Table } from 'react-bootstrap';
 import { Navigate, useNavigate  } from 'react-router-dom'
@@ -27,11 +28,6 @@ function MainApp() {
     }
   }
 
-  const updateTransactions = (data) => {
-    console.log(data);
-    setTransactionList(data)
-  }
-
   const showCryptoPrice = () =>{
     try{
       if (crypto === '')return;
@@ -41,25 +37,10 @@ function MainApp() {
         if((res.data).toString().startsWith("0"))setPrice((res.data).toFixed(6));
         else setPrice((res.data).toFixed(2));
       })
-    
-        /*
-.then(res => {
-        if((res.data).startsWith("0"))(res.data).toFixed(6)
-        else (res.data).toFixed(2)
-      })
-        */
     }catch(err){
       console.log(err)
     }
   }
-
-  /*useEffect(() => {
-    showCryptoPrice(crypto);
-  }, [crypto])*/
-
-  const sleep = ms => new Promise(
-    resolve => setTimeout(resolve, ms)
-  );
 
   const postTransaction = async () => {
     try{
@@ -70,13 +51,19 @@ function MainApp() {
         if((res.data).toString().startsWith("0")) return (res.data).toFixed(6);
         else return (res.data).toFixed(2);
       })
+
       setPrice(crypto_price)
+
+      const date = new Date()
+      const datetime = date.getFullYear()+'-'+String(date.getMonth()).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0')
+                        +' '+String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0')
 
       await axios.post(`http://localhost:8000/api/user/${username}/transactions`, {
         'action':action,
         'crypto':crypto,
         'price':parseFloat(crypto_price),
-        'amount':amount
+        'amount':amount,
+        'datetime':datetime
       })
       .then(res => setTransactionList(res.data))
 
@@ -89,9 +76,13 @@ function MainApp() {
   }
 
     const navigate = useNavigate();
-    const  editTransaction = (props) =>{
-        console.log(props)
+    const editTransaction = (props) =>{
         navigate(`user/${props.username}/transaction/${props.index}`)
+    }
+
+    const deleteTransaction = async (props) => {
+        await axios.delete(`http://localhost:8000/api/user/${props.username}/transactions/${props.index}`)
+        .then(res => setTransactionList(res.data))    
     }
 
     return (
@@ -132,20 +123,17 @@ function MainApp() {
             </Button>
             </div>
 
-
-
-            {/*transactionList.map((obj, index) => {
-              return (<TransactionView key={index} id={index} action = {obj.action} crypto={obj.crypto} price={obj.price} amount={obj.amount} username={username}/>)
-            })*/}
-
 <Table striped bordered hover>
       <thead>
         <tr>
           <th>#</th>
           <th>Buy/Sell</th>
+          <th>Date</th>
           <th>Crypto</th>
           <th>Price</th>
           <th>Amount</th>
+          <th>Edit</th>
+          <th>Remove</th>
         </tr>
       </thead>
       <tbody>
@@ -153,14 +141,13 @@ function MainApp() {
             return (<tr key={index}>
                 <td>{index}</td>
                 <td>{obj.action}</td>
+                <td>{obj.datetime}</td>
                 <td>{obj.crypto}</td>
                 <td>{obj.price}</td>
                 <td>{obj.amount}</td>
-                <td><Button  startIcon={<EditIcon />} size="small" color="primary" variant="contained" onClick={() => editTransaction({username, index})}>
-                    Edit
-                </Button></td>
+                <td><Button  startIcon={<EditIcon />} size="small" color="primary" variant="contained" onClick={() => editTransaction({username, index})}></Button></td>
+                <td><Button  startIcon={<DeleteIcon />} size="small" color="primary"  variant="contained" onClick={() => deleteTransaction({username, index})}></Button></td>
             </tr>)
-              //return (<TransactionView key={index} id={index} action = {obj.action} crypto={obj.crypto} price={obj.price} amount={obj.amount} username={username}/>)
         })}
        
       </tbody>
